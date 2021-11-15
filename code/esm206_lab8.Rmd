@@ -37,20 +37,88 @@ homes_sub <- homes %>%
 Explore data --> summar stats (home price, based on city and sale status)
 
 If you don't want to run code, set "eval = FALSE" in the {r} part
-```{r}
+```{r, include = FALSE, eval = FALSE}
 homes_sub %>% 
   group_by(city, status) %>% 
   summarize(mean_price = mean(price, na.rm = TRUE),
             sd_price = sd(price, na.rm = TRUE))
+
+ggplot(data = homes_sub, aes(x = price)) + 
+  geom_density(aes(color = city, fill = city), alpha = .3) +
+  scale_x_continuous(limits = c(0, 3e6))
+
+```
+
+Explore the relationship with visualizations between sqft and price
+- show color based on city and shape based on status
+
+```{r}
+ggplot(homes_sub, aes(x = sq_ft, y = price)) +
+  geom_point(aes(color = city, shape = status)) +
+  geom_smooth(method = lm)
 ```
 
 
+Model the relationship with home price as DV
 
+```{r}
+homes_lm1 <- lm(price ~ city + bedrooms + bathrooms + sq_ft + price_per_sq_ft + status, data = homes_sub)
 
+# Make a subset that only has quantitative variables
 
+homes_quant <- homes_sub %>% 
+  select(price:price_per_sq_ft)
 
+# use cor() to olook for correlation between variables 
 
+homes_cor <- cor(homes_quant)
+homes_cor # create plot of corr value
+corrplot(homes_cor, method = "shade") # visualy shows the corr value 
+```
 
+Try another homes model (homes_lm2) where wi simplify to only include the following
+- city
+-sqft
+-status
 
+```{r}
+homes_lm2 <- lm(price ~ city + sq_ft + status, homes_sub)
 
+plot(homes_lm2)
+summary(homes_lm2)
+```
+Ideal model has high fit (Rsq) and low complecity (AIC)
 
+Use AIC() to find value of each model (lower AIC is better)
+
+```{r}
+round(AIC(homes_lm1),0)
+round(AIC(homes_lm2),0)
+```
+
+Try to make a new dank model
+
+```{r}
+homes_lm3 <- lm(price ~ status + sq_ft + city, homes_sub)
+
+summary(homes_lm3)
+AIC(homes_lm3)
+
+```
+
+Use modelsummary to show outputs side by side (or you can use stargazer)
+- if you use modelsumary for multiple models, then you need to feed it as a list
+
+```{r}
+modelsummary(list(homes_lm1, homes_lm2, homes_lm3))
+```
+
+Use broom::augment() to show predictions of model
+
+```{r}
+homes_predicted <- augment(homes_lm1)
+```
+
+Done with linear regression ----------
+
+Branch
