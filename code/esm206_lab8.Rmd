@@ -1,0 +1,56 @@
+---
+title: "Lab 8"
+author: "Eli Schulman"
+date: "11/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+library(tidyverse)
+library(corrplot)
+library(stargazer)
+library(broom)
+library(here)
+library(modelsummary)
+library(janitor)
+```
+
+
+```{r}
+homes <- read_csv(here("data", "slo_homes.csv")) %>% 
+  clean_names()
+```
+
+Make a subseet of homes_sub that only contains the following cities:
+- San Luis Obispo
+- AG
+- Atascadero
+- Santa Maria-Orcutt
+
+```{r}
+homes_sub <- homes %>% 
+  filter(city %in% c("Arroyo Grande", "San Luis Obispo", "Atascadero", "Santa Maria-Orcutt"))
+```
+
+Explore data --> summar stats (home price, based on city and sale status)
+
+If you don't want to run code, set "eval = FALSE" in the {r} part
+```{r}
+homes_sub %>% 
+  group_by(city, status) %>% 
+  summarize(mean_price = mean(price, na.rm = TRUE),
+            sd_price = sd(price, na.rm = TRUE))
+```
+
+
+
+
+
+
+
+
+
+
+
